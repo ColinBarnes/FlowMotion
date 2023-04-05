@@ -79,7 +79,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Dancer Projection Mapping</title>
+        <title>FlowMotion</title>
         <meta name="description" content="An app to project visuals on a dancer" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
