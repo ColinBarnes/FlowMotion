@@ -33,46 +33,62 @@ type ToggleSettingItem = {
     setValue: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-type Props = FloatSettingItem | Vec2SettingItem | Vec3SettingItem | ToggleSettingItem;
+type SettingItem = FloatSettingItem | Vec2SettingItem | Vec3SettingItem | ToggleSettingItem;
 
-const SettingItem = ({displayName, type, min, max, value, step, setValue}: Props) => {
+function isFloat(item: SettingItem ): item is FloatSettingItem {
+    return (item as FloatSettingItem).type === "FLOAT";
+}
+
+function isVec2(item: SettingItem ): item is Vec2SettingItem {
+    return (item as Vec2SettingItem).type === "VEC2";
+}
+
+function isVec3(item: SettingItem ): item is Vec3SettingItem {
+    return (item as Vec3SettingItem).type === "VEC3";
+}
+
+function isToggle(item: SettingItem ): item is ToggleSettingItem {
+    return (item as ToggleSettingItem).type === "TOGGLE";
+}
+
+const SettingItem = (item: SettingItem) => {
     return (
         <div className='h-full m-auto md:text-xl flex flex-col items-center justify-evenly sm:text-sm'>
-            <div className='w-40 md:w-48 uppercase font-extralight text-center'>{displayName}</div>
+            <div className='w-40 md:w-48 uppercase font-extralight text-center'>{item.displayName}</div>
                 <div>          
-                    {type === "FLOAT" &&
+                    {isFloat(item) &&
                         <input 
                         className='bg-transparent font-mono text-center'
                         type="number" 
-                        min={min} 
-                        max={max}
-                        step={step || 1}
-                        value={value}
-                        onChange={e => setValue(e.target.valueAsNumber)}
+                        min={item.min} 
+                        max={item.max}
+                        step={item.step || 1}
+                        value={item.value}
+                        onChange={e => item.setValue(e.target.valueAsNumber)}
                         />
                     }
-                    {type === "TOGGLE" &&
-                        <div>{ value ? 'Enabled' : 'Disabled' }</div>
+                    {isToggle(item) &&
+                        <div>{ item.value ? 'Enabled' : 'Disabled' }</div>
                     }
                 </div>
             <div >
-                {type === "FLOAT" &&
+                {isFloat(item) &&
                     <input 
                         className='w-full bg-white/30 accent-white rounded-lg appearance-none cursor-pointer'
                         type="range" 
-                        min={min} 
-                        max={max}
-                        step={step || 1}
-                        value={value}
-                        onChange={e => setValue(e.target.valueAsNumber)}
+                        min={item.min} 
+                        max={item.max}
+                        step={item.step || 1}
+                        value={item.value}
+                        onChange={e => item.setValue(e.target.valueAsNumber)}
                     />
                 }
-                {type === "TOGGLE" &&
+                {isToggle(item) &&
                     <input 
                         className='w-5 h-5 bg-white/30 accent-zinc-400 text-black rounded-full cursor-pointer'
                         type="checkbox" 
-                        checked={value}
-                        onChange={ () => setValue(!value)}
+                        checked={item.value}
+                        onChange={ () => item.setValue(!item.value)}
                     />
                 }
             </div>
