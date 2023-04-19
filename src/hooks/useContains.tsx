@@ -12,6 +12,8 @@ function useContain(width: number, height: number, factor: number = 1): [number,
         if( width === 0 || height === 0) {
             return [1,1,1];
         }
+        console.log('screen resolution', screen.width, screen.height);
+        console.log('video resolution', width, height);
         const scale = Math.min( screen.width/width, screen.height/height );
         return [scale * width * factor, scale * height * factor, 1];
     }, [screen.width, screen.height, width, height, factor]);
