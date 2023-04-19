@@ -34,18 +34,14 @@ function usePose() {
 
         async function updatePoses() {
             if (!detector || !node ) {
-              //console.log('detector', detector);
-              //console.log('videoRef', videoRef.current);
               return;
             }
-            //console.log('we have both!');
-            //console.log('detector', detector);
-            //console.log('videoRef', videoRef.current);
-            const newPoses = await detector.estimatePoses(videoRef.current);
-            //console.log('poses', newPoses);
-            
-            setPoses(newPoses);
-            requestAnimationFrame(updatePoses);
+
+            if(videoRef.current) {
+                const newPoses = await detector.estimatePoses(videoRef.current);
+                setPoses(newPoses);
+                requestAnimationFrame(updatePoses);
+            }
         }
 
         if(node) {
