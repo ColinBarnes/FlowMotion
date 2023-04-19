@@ -10,10 +10,8 @@ const MicrophoneSettings = ({ onAudioStream }: Props) => {
     const [microphone, setMicrophone] = useState<MediaStream | null>(null);
 
     const handleEnableMediaAccess = async () => {
-        const streams = await navigator.mediaDevices.getUserMedia( {video: true, audio: true} );
-        const deviceList = await navigator.mediaDevices.enumerateDevices();
+        const deviceList = await (await navigator.mediaDevices.enumerateDevices()).filter(dev => dev.kind === 'audioinput');
         setDevices(deviceList);
-        streams.getTracks().forEach( track => { track.stop(); } );
         if( onAudioStream ) {
             const micStream = await navigator.mediaDevices.getUserMedia( {
                 audio: {
@@ -49,14 +47,14 @@ const MicrophoneSettings = ({ onAudioStream }: Props) => {
         {!devices && 
             <div onClick={handleEnableMediaAccess} className='flex flex-col items-center cursor-pointer'>
                 <BiMicrophone className="mb-2" /> 
-                <div>Enable Microphone</div> 
+                <div>Enable Microphone</div>
             </div> 
         }
         {devices &&
             <div className='flex flex-col items-center cursor-pointer'>
                 <BiMicrophone className="mb-2" />
                 <select name="microphone" onChange={handleSelectedMicrophone} className="rounded-lg p-2 backdrop-blur-sm bg-white/25">
-                    {devices?.filter( device => (device.deviceId !== '') && (device.kind === 'audioinput'))
+                    {devices?.filter( device => device.deviceId !== '' )
                         .map( device => <option hidden={false} key={`${device.groupId}-${device.deviceId}`} value={device.deviceId}>{device.label}</option>)}
                 </select> 
             </div>                

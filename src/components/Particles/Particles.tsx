@@ -4,7 +4,6 @@ import { fragShaderBasic, vertexShaderBasic } from "./Shaders";
 import { useFBO } from "@react-three/drei";
 import { FloatType, NearestFilter, OrthographicCamera, RGBAFormat, Scene, ShaderMaterial, Vector2 } from "three";
 import { fragShaderSimulation, vertexShaderSimulation } from "./SimulationShaders";
-import { useControls } from "leva";
 
 type Props = {
     particleCount?: number,
@@ -13,7 +12,8 @@ type Props = {
     volumeSensitivity?: number
     forcePoint?: Vector2,
     forcePointActive?: boolean,
-    audioAnalyzer?: React.MutableRefObject<AnalyserNode | null>
+    audioAnalyzer?: React.MutableRefObject<AnalyserNode | null>,
+    emitterPos?: Vector2 | null
 }
 
 const simulationUniforms = {
@@ -26,8 +26,11 @@ const simulationUniforms = {
     lastFrame: {
         value: null
     },
-    emmiterPos: {
-        value: new Vector2(.5, 0.5)
+    emitterActive: {
+        value: false
+    },
+    emitterPos: {
+        value: new Vector2(0.5, 0.5)
     },
     MAXLIFETIME: {
         value: 5
@@ -74,7 +77,8 @@ const Particles = ( {
     particleCount = MAXPARTICLES, 
     maxLifeTime = 5,
     maxSpeed = 10,
-    volumeSensitivity = 25
+    volumeSensitivity = 25,
+    emitterPos = null
 }: Props) => {    
     const swap = useRef(false); // Used to swap render targets ever frame
     const shaderSimulationRef = useRef<ShaderMaterial>(null);
@@ -126,7 +130,10 @@ const Particles = ( {
             shaderSimulationRef.current.uniforms.iTime.value = clock.elapsedTime;
             shaderSimulationRef.current.uniforms.iTimeDelta.value = delta;
             shaderSimulationRef.current.uniforms.lastFrame.value = swap.current ? renderTargetB.texture : renderTargetA.texture;
-            shaderSimulationRef.current.uniforms.emmiterPos.value = new Vector2(.5, 0.5);
+            if(emitterPos) {
+                shaderSimulationRef.current.uniforms.emitterActive.value = true;
+                shaderSimulationRef.current.uniforms.emitterPos.value = emitterPos;
+            }
             shaderSimulationRef.current.uniforms.MAXLIFETIME.value = maxLifeTime; 
             shaderSimulationRef.current.uniforms.particleCount.value = count;
             shaderSimulationRef.current.uniforms.forcePoint.value = forcePoint;

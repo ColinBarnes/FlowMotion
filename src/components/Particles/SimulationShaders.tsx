@@ -14,7 +14,8 @@ export const fragShaderSimulation = `
 uniform float iTime;
 uniform float iTimeDelta;
 uniform sampler2D lastFrame;
-uniform vec2 emmiterPos;
+uniform bool emitterActive;
+uniform vec2 emitterPos;
 uniform float MAXLIFETIME;
 uniform float particleCount;
 uniform vec2 forcePoint;
@@ -116,7 +117,7 @@ void main()	{
 
     // Initially start with random positions and velocities
     if( iTime < 1.5 || life < lifeLast ) {
-        Pos = emmiterPos;
+        Pos = emitterPos;
 
         // Debug
         /*
@@ -129,8 +130,9 @@ void main()	{
         float s = .25;
         float w = 2.;
         float h = 2.;
-        Pos = vec2( w*sin( 5.*iTime*s + 3.1415/2. ), h*sin( 4.*iTime*s ) );
-        
+        if(!emitterActive) {
+            Pos = vec2( w*sin( 5.*iTime*s + 3.1415/2. ), h*sin( 4.*iTime*s ) );
+        }        
 
         // Random velocity between [-1,1]
         Vel = hash22( uvec2( uint(gv.x) + pcg( uint(iTime*1000.) ), uint(gv.y) + pcg( uint(iTime*1000.) ) ) );
@@ -140,8 +142,9 @@ void main()	{
         Vel.x = sqrt(Vel.x)*4.* mix(1., 4., volume); 
         Vel = vec2( Vel.x*cos(Vel.y*2.*3.1415), Vel.x*sin(Vel.y*2.*3.1415) );
 
-        Vel += vec2( 5. * w * s * cos( 5. * iTime*s + 3.1415/2. ),  4. * w * s * cos( 4. * iTime ) );
-
+        if(!emitterActive) {
+            Vel += vec2( 5. * w * s * cos( 5. * iTime*s + 3.1415/2. ),  4. * w * s * cos( 4. * iTime ) );
+        }
         posVel = vec4(Pos, Vel);
     }
 

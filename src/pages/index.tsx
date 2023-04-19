@@ -3,24 +3,52 @@ import { Canvas, ThreeEvent } from '@react-three/fiber'
 import Particles from '@/components/Particles/Particles'
 import { NoToneMapping, Vector2 } from 'three'
 import { OrthographicCamera, Stats } from '@react-three/drei'
-import { useEffect, useRef, useState } from 'react'
-import { useControls } from 'leva'
-import '@tensorflow/tfjs-backend-webgl'
-import * as poseDetection from '@tensorflow-models/pose-detection'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import {Pose} from '@tensorflow-models/pose-detection';
 import MicrophoneSettings from '@/components/MicrophoneSettings/MicrophoneSettings'
 import WebcamSettings from '@/components/WebcamSettings/WebcamSettings'
 import { IconContext } from 'react-icons'
 import {HiSparkles} from 'react-icons/hi';
+import {IoMdBody} from 'react-icons/io'
 import SettingItem from '@/components/Menu/SettingItem'
+import Webcam from '@/components/Webcam/Webcam'
+import usePoseDetector from '@/hooks/usePoseDetector'
+import PosePreview from '@/components/Pose/PosePreview'
+import PoseToWorldSpace from '@/components/Pose/PoseToWorldSpace'
+import { getChestVector } from '@/utils/getPose'
+import SubMenu from '@/components/Menu/SubMenu'
+import Menu from '@/components/Menu/Menu'
+import MenuItem from '@/components/Menu/MenuItem'
 
 export default function Home() {
+  // Input
   const [mouseLoc, setMouseLoc] = useState( new Vector2(0, 0) );
-  const [microphone, setMicrophone] = useState<MediaStream | null>(null);
+  
+  // Camera
   const [camera, setCamera] = useState<MediaStream | null>(null);
-  const [poseDetector, setPoseDetector] = useState<poseDetection.PoseDetector | null>(null);
-  const audioCtx = useRef<AudioContext | null>( null );
-  const audioAnalyzer = useRef<AnalyserNode | null>( null );
-  const audioSource = useRef<MediaStreamAudioSourceNode | null>(null);
+  const cameraRef = useRef<HTMLVideoElement | null>(null);
+  const cameraResolution = useMemo( () => {
+    let res = new Vector2(0, 0);
+    if( camera ) {
+      const {width = 0, height = 0} = camera.getVideoTracks()[0].getSettings();
+      res = new Vector2(width, height);
+    }     
+    return res;
+  }, [camera]);
+  const [worldSpaceCameraSize, setWorldSpaceCameraSize] = useState<[number, number, number]>([1,1,1]);
+  
+  // Audio
+  const [microphone, setMicrophone] = useState<MediaStream | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>( null );
+  const audioAnalyzerRef = useRef<AnalyserNode | null>( null );
+  const audioSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+
+  // Pose
+  const [viewPoseSettings, setViewPoseSettings] = useState(false);
+  const [viewPosePreview, setViewPosePreview] = useState(true);
+  const [poseScale, setPoseScale] = useState(1);
+  const videoSpacePoses = usePoseDetector(cameraRef);
+  const [worldSpacePoses, setWorldSpacePoses] = useState<Pose[] | []>([]);
 
   // General Settings
   const [stats, setStats] = useState(false);
@@ -38,30 +66,20 @@ export default function Home() {
   }
 
   const handlePointerDown = ( event: ThreeEvent<PointerEvent> ) => {
-    if( viewParticleSettings ) {
-      setViewParticleSettings( !viewParticleSettings );
-    }
+    setViewParticleSettings( false );
+    setViewPoseSettings(false);
     handlePointerMove(event);
   }
-
-  // Pose Detector
-  useEffect(() => {
-    const createDetector= async () => {
-      const detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet);
-      setPoseDetector(detector);
-    }
-    createDetector();
-  }, []);
 
   // Analyzer
   useEffect( () => {
     if(microphone ) {
-      audioCtx.current = new AudioContext();
+      audioCtxRef.current = new AudioContext();
       console.log('audio context setup');
-      audioAnalyzer.current = audioCtx.current.createAnalyser();
+      audioAnalyzerRef.current = audioCtxRef.current.createAnalyser();
       console.log('analyzer setup');
-      audioSource.current = audioCtx.current.createMediaStreamSource( microphone );
-      audioSource.current.connect(audioAnalyzer.current);
+      audioSourceRef.current = audioCtxRef.current.createMediaStreamSource( microphone );
+      audioSourceRef.current.connect(audioAnalyzerRef.current);
     } 
   }, [microphone]);
 
@@ -93,10 +111,23 @@ export default function Home() {
               { stats && <Stats />}
               <ambientLight />
               <pointLight position={[10, 10, 10]} />
+
+              {/*Pose */}
+              <PoseToWorldSpace 
+                poses={videoSpacePoses}
+                videoResolution={cameraResolution}
+                setWorldSpacePoses={setWorldSpacePoses}
+                setWorldSpaceVideoSize={setWorldSpaceCameraSize}
+                scale={poseScale}
+              />
+              {camera && viewPosePreview && <PosePreview src={camera} worldSpacePoses={worldSpacePoses} worldSpaceVideoSize={worldSpaceCameraSize}/>}
+              
+              {/* Get world cordinates of pointer */}
               <mesh onPointerMove={handlePointerMove} onPointerDown={handlePointerDown}>
                 <planeGeometry args={[100,100]} />
-                <meshBasicMaterial color={'black'} transparent />
+                <meshBasicMaterial transparent  opacity={0} />
               </mesh>
+              
               <Particles 
                 particleCount={particleCount}
                 maxLifeTime={maxLifeTime}
@@ -104,7 +135,8 @@ export default function Home() {
                 volumeSensitivity={volumeSensitivity}
                 forcePoint={mouseLoc}
                 forcePointActive={forcePointActive}
-                audioAnalyzer={audioAnalyzer}
+                audioAnalyzer={audioAnalyzerRef}
+                emitterPos={ worldSpacePoses.length >0 ? getChestVector(worldSpacePoses) : null}
               />
               <OrthographicCamera
                 makeDefault
@@ -119,7 +151,7 @@ export default function Home() {
               />
             </Canvas>
           </div>
-          { viewParticleSettings && <div className='px-10 w-full flex flex-row gap-32 col-start-1 col-span-full row-start-5 row-span-1 z-10 backdrop-blur-lg bg-white/10 overflow-x-auto'>
+          <SubMenu visible={viewParticleSettings}>
             <SettingItem 
               type="FLOAT"
               displayName='Particle Count'
@@ -167,18 +199,45 @@ export default function Home() {
               value={stats}
               setValue={setStats}
             />
-          </div> }
-          <div className='transition-opacity duration-500 md:opacity-0 hover:opacity-100 col-start-1 col-span-full row-start-6 row-span-1 z-10 flex flex-row justify-evenly items-center overflow-x-auto'>
+          </SubMenu>
+          <SubMenu visible={viewPoseSettings}>
+            <SettingItem 
+              type="TOGGLE"
+              displayName="View Video"
+              value={viewPosePreview}
+              setValue={setViewPosePreview}
+            />
+            <SettingItem 
+              type="FLOAT"
+              displayName='Scale'
+              min={0}
+              max={2}
+              step={.01}
+              value={poseScale}
+              setValue={setPoseScale}
+            />
+          </SubMenu>
+          <Menu>
             <IconContext.Provider value={{size: '2em'}}>
               <MicrophoneSettings onAudioStream={setMicrophone} />
-              {/*<WebcamSettings onVideoStream={setCamera} /> */}
-              <div 
-                onClick={ () => setViewParticleSettings(!viewParticleSettings)}
-                className='flex flex-col items-center cursor-pointer' >
-                <HiSparkles className="mb-2" />
-                <div>Particles</div>
-              </div>
+              <WebcamSettings onVideoStream={setCamera} />
+              <MenuItem 
+                onClick={() => { setViewParticleSettings(!viewParticleSettings); setViewPoseSettings(false); }}
+                label={'Particles'}>
+                  <HiSparkles className="mb-2" />
+              </MenuItem>
+              <MenuItem 
+                onClick={() => { setViewPoseSettings(!viewPoseSettings); setViewParticleSettings(false); }}
+                label={'Pose'}>
+                  <IoMdBody className="mb-2" />
+              </MenuItem>
             </IconContext.Provider>
+          </Menu>
+          <div className='z-1 col-start-1 col-span-full row-start-5 row-span-1'>
+            <Webcam 
+              stream={camera}
+              videoRef={cameraRef}
+            />
           </div>
         </div>
       </main>
