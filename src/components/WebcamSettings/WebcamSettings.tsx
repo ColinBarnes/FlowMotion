@@ -16,7 +16,6 @@ const WebcamSettings = ({ onVideoStream }: Props) => {
         if( onVideoStream ) {
             const camStream = await navigator.mediaDevices.getUserMedia( {
                 video: {
-                    aspectRatio: window.screen.orientation.type === "portrait-primary" ? 9/16 : 16/9,
                     deviceId: {
                         exact: deviceList[0].deviceId
                     }
