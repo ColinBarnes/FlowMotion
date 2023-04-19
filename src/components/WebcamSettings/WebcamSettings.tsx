@@ -10,11 +10,15 @@ const WebcamSettings = ({ onVideoStream }: Props) => {
     const [camera, setCamera] = useState<MediaStream | null>(null);
 
     const handleEnableMediaAccess = async () => {
+        const allDevices = await navigator.mediaDevices.enumerateDevices();
+        console.log('All Devices', allDevices);
+        console.log('Screen Orientation', screen.orientation.type);
         const deviceList = await (await navigator.mediaDevices.enumerateDevices()).filter(dev => dev.kind === 'videoinput');
         setDevices(deviceList);
         if( onVideoStream ) {
             const camStream = await navigator.mediaDevices.getUserMedia( {
                 video: {
+                    aspectRatio: screen.orientation.type === "portrait-primary" ? 9/16 : 16/9,
                     deviceId: {
                         exact: deviceList[0].deviceId
                     }
