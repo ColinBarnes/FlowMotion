@@ -17,9 +17,14 @@ function useContain(width: number, height: number, factor: number = 1): [number,
         const videoIsLandscape = videoAspect > 1;
         let scale;
         if( screenIsLandscape !== videoIsLandscape ) {
-            scale = ( videoAspect > 1 ) ? screen.width/width : screen.height/height;
+            scale = ( videoIsLandscape ) ? screen.width/width : screen.height/height;
         } else {
-            scale = ( screen.aspect < videoAspect ) ? screen.width/width : screen.height/height;
+            if( screenIsLandscape ) {
+                scale = ( screen.aspect < videoAspect ) ? screen.width/width : screen.height/height;
+            } else {
+                scale = ( screen.aspect < videoAspect ) ? screen.height/height : screen.width/width;
+            }
+            
         }
         return [scale * width * factor, scale * height * factor, 1];
     }, [screen.width, screen.height, screen.aspect, width, height, factor]);
