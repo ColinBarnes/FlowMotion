@@ -22,6 +22,7 @@ uniform vec2 forcePoint;
 uniform float forcePointActive;
 uniform bool handsActive;
 uniform vec2 hands[2];
+uniform float attractorStrength;
 uniform float MAXSPEED;
 uniform float volume;
 uniform float gravityMagnitude;
@@ -96,11 +97,11 @@ void main()	{
     vec2 Vel = posVel.zw;
     vec2 Acc = vec2(0., gravityMagnitude); // gravity
 
-    Acc += pointToForce( forcePoint, Pos )*10. * forcePointActive;
+    Acc += pointToForce( forcePoint, Pos )*attractorStrength * forcePointActive;
 
     if(handsActive) {
         for(int i = 0; i < hands.length(); i++) {
-            Acc += pointToForce( hands[i], Pos )*10.;
+            Acc += pointToForce( hands[i], Pos )*attractorStrength;
         }
     }
     

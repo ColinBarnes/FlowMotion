@@ -15,7 +15,8 @@ type Props = {
     hands?: Vector2[],
     gravityMagnitude?: number,
     audioAnalyzer?: React.MutableRefObject<AnalyserNode | null>,
-    emitterPos?: Vector2 | null
+    emitterPos?: Vector2 | null,
+    attractorStrength?: number
 }
 
 const simulationUniforms = {
@@ -60,6 +61,9 @@ const simulationUniforms = {
     },
     gravityMagnitude: {
         value: -10
+    },
+    attractorStrength: {
+        value: 10
     }
 };
 
@@ -91,7 +95,8 @@ const Particles = ( {
     maxSpeed = 10,
     volumeSensitivity = 25,
     emitterPos = null,
-    gravityMagnitude = -10
+    gravityMagnitude = -10,
+    attractorStrength = 10
 }: Props) => {    
     const swap = useRef(false); // Used to swap render targets ever frame
     const shaderSimulationRef = useRef<ShaderMaterial>(null);
@@ -151,6 +156,7 @@ const Particles = ( {
                 shaderSimulationRef.current.uniforms.handsActive.value = true;
                 shaderSimulationRef.current.uniforms.hands.value = hands;
             }
+            shaderSimulationRef.current.uniforms.attractorStrength.value = attractorStrength;
             shaderSimulationRef.current.uniforms.gravityMagnitude.value = gravityMagnitude;
             shaderSimulationRef.current.uniforms.MAXLIFETIME.value = maxLifeTime; 
             shaderSimulationRef.current.uniforms.particleCount.value = count;

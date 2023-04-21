@@ -66,6 +66,7 @@ export default function Home() {
   const [volumeSensitivity, setVolumeSensitivity] = useState(10);
   const [forcePointActive, setForcePointActive] = useState(true);
   const [gravityMagnitude, setGravityMagnitude] = useState(-10);
+  const [attractorStrength, setAttractorStrength] = useState(10);
 
   const handlePointerMove = ( event: ThreeEvent<PointerEvent> ) => {
     setMouseLoc( new Vector2(event.unprojectedPoint.x, event.unprojectedPoint.y) );
@@ -145,6 +146,7 @@ export default function Home() {
                 gravityMagnitude={gravityMagnitude}
                 emitterPos={ worldSpacePoses.length >0 ? getChestVector(worldSpacePoses) : null}
                 hands={worldSpacePoses.length >0 ? getHandsVector(worldSpacePoses) : undefined } 
+                attractorStrength={attractorStrength}
               />
               <OrthographicCamera
                 makeDefault
@@ -206,9 +208,18 @@ export default function Home() {
             />
             <SettingItem 
               type="TOGGLE"
-              displayName='Pointer Reactive'
+              displayName='Pointer Is Attractor'
               value={forcePointActive}
               setValue={setForcePointActive}
+            />
+            <SettingItem 
+              type="FLOAT"
+              displayName='Attractor Strength'
+              min={0}
+              max={200}
+              step={1}
+              value={attractorStrength}
+              setValue={setAttractorStrength}
             />
             <SettingItem 
               type="TOGGLE"
