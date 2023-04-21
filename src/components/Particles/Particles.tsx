@@ -12,6 +12,7 @@ type Props = {
     volumeSensitivity?: number
     forcePoint?: Vector2,
     forcePointActive?: boolean,
+    hands?: Vector2[],
     audioAnalyzer?: React.MutableRefObject<AnalyserNode | null>,
     emitterPos?: Vector2 | null
 }
@@ -44,6 +45,12 @@ const simulationUniforms = {
     forcePointActive: {
         value: 1.
     },
+    handsActive: {
+        value: false
+    },
+    hands: {
+        value: [new Vector2(0,0), new Vector2(0, 0)]
+    },
     MAXSPEED: {
         value: 5.
     },
@@ -72,7 +79,8 @@ const uniforms = {
 const MAXPARTICLES = 5_000;
 const Particles = ( { 
     forcePointActive = true,
-    forcePoint = new Vector2(0,0), 
+    forcePoint = new Vector2(0,0),
+    hands,
     audioAnalyzer, 
     particleCount = MAXPARTICLES, 
     maxLifeTime = 5,
@@ -133,6 +141,10 @@ const Particles = ( {
             if(emitterPos) {
                 shaderSimulationRef.current.uniforms.emitterActive.value = true;
                 shaderSimulationRef.current.uniforms.emitterPos.value = emitterPos;
+            }
+            if(hands) {
+                shaderSimulationRef.current.uniforms.handsActive.value = true;
+                shaderSimulationRef.current.uniforms.hands.value = hands;
             }
             shaderSimulationRef.current.uniforms.MAXLIFETIME.value = maxLifeTime; 
             shaderSimulationRef.current.uniforms.particleCount.value = count;

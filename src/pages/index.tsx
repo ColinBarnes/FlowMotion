@@ -15,7 +15,7 @@ import Webcam from '@/components/Webcam/Webcam'
 import usePoseDetector from '@/hooks/usePoseDetector'
 import PosePreview from '@/components/Pose/PosePreview'
 import PoseToWorldSpace from '@/components/Pose/PoseToWorldSpace'
-import { getChestVector } from '@/utils/getPose'
+import { getChestVector, getHandsVector } from '@/utils/getPose'
 import SubMenu from '@/components/Menu/SubMenu'
 import Menu from '@/components/Menu/Menu'
 import MenuItem from '@/components/Menu/MenuItem'
@@ -30,6 +30,11 @@ export default function Home() {
   const cameraResolution = useMemo( () => {
     let res = new Vector2(0, 0);
     if( camera ) {
+      const tracks = camera.getVideoTracks();
+      console.log('# of tracks:', tracks.length);
+      console.log('width', tracks[0].getSettings().width );
+      console.log('height', tracks[0].getSettings().height );
+      console.log('videoAspect', tracks[0].getSettings().aspectRatio);
       const {width = 0, height = 0} = camera.getVideoTracks()[0].getSettings();
       res = new Vector2(width, height);
     }     
@@ -137,6 +142,7 @@ export default function Home() {
                 forcePointActive={forcePointActive}
                 audioAnalyzer={audioAnalyzerRef}
                 emitterPos={ worldSpacePoses.length >0 ? getChestVector(worldSpacePoses) : null}
+                hands={worldSpacePoses.length >0 ? getHandsVector(worldSpacePoses) : undefined } 
               />
               <OrthographicCamera
                 makeDefault

@@ -7,11 +7,18 @@ export const AllBodyParts: BodyPart[] = ['nose' , 'left_eye' , 'right_eye' , 'le
 export const Face: BodyPart[] = ['nose' , 'left_eye' , 'right_eye' , 'left_ear' , 'right_ear'];
 export const Arms: BodyPart[] = [ 'left_shoulder' , 'right_shoulder' , 'left_elbow' , 'right_elbow' , 'left_wrist' , 'right_wrist' ];
 export const Legs: BodyPart[] = [  'left_hip', 'right_hip' , 'left_knee' , 'right_knee' , 'left_ankle' , 'right_ankle' ];
+export const Hands: BodyPart[] = [ 'left_wrist' , 'right_wrist' ];
 export const Torso: BodyPart[] = ['left_shoulder', 'right_shoulder', 'left_hip', 'right_hip'];
 
-export function getChestVector( poses: Pose[] | [] ) {
+export function getChestVector( poses: Pose[] | [] ): Vector2 {
     const chest: {x: number, y: number} = poses[0].keypoints
         .filter( ({name}) => name && Torso.includes(name as BodyPart) )
         .reduce( (prev, curr, i) => ({x: (curr.x + i*prev.x)/(i+1) , y: (curr.y + i*prev.y)/(i+1) }), {x: 0, y: 0} ); // Average points
     return new Vector2( chest.x, chest.y);
+}
+
+export function getHandsVector( poses: Pose[] | [] ): Vector2 [] {
+    return poses[0].keypoints
+        .filter( ({name}) => name && Hands.includes(name as BodyPart) )
+        .map( pt => new Vector2(pt.x, pt.y));
 }

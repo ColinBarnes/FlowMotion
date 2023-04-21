@@ -20,6 +20,8 @@ uniform float MAXLIFETIME;
 uniform float particleCount;
 uniform vec2 forcePoint;
 uniform float forcePointActive;
+uniform bool handsActive;
+uniform vec2 hands[2];
 uniform float MAXSPEED;
 uniform float volume;
 
@@ -94,6 +96,12 @@ void main()	{
     vec2 Acc = vec2(0., -10.); // gravity
 
     Acc += pointToForce( forcePoint, Pos )*10. * forcePointActive;
+
+    if(handsActive) {
+        for(int i = 0; i < hands.length(); i++) {
+            Acc += pointToForce( hands[i], Pos )*10.;
+        }
+    }
     
     Vel += Acc*iTimeDelta;
 
