@@ -24,6 +24,7 @@ uniform bool handsActive;
 uniform vec2 hands[2];
 uniform float MAXSPEED;
 uniform float volume;
+uniform float gravityMagnitude;
 
 //float MAXSPEED = 5.;
 
@@ -93,7 +94,7 @@ void main()	{
     
     vec2 Pos = posVel.xy;
     vec2 Vel = posVel.zw;
-    vec2 Acc = vec2(0., -10.); // gravity
+    vec2 Acc = vec2(0., gravityMagnitude); // gravity
 
     Acc += pointToForce( forcePoint, Pos )*10. * forcePointActive;
 

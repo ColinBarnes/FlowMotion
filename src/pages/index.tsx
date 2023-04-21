@@ -65,6 +65,7 @@ export default function Home() {
   const [maxSpeed, setMaxSpeed] = useState(100);
   const [volumeSensitivity, setVolumeSensitivity] = useState(10);
   const [forcePointActive, setForcePointActive] = useState(true);
+  const [gravityMagnitude, setGravityMagnitude] = useState(-10);
 
   const handlePointerMove = ( event: ThreeEvent<PointerEvent> ) => {
     setMouseLoc( new Vector2(event.unprojectedPoint.x, event.unprojectedPoint.y) );
@@ -141,6 +142,7 @@ export default function Home() {
                 forcePoint={mouseLoc}
                 forcePointActive={forcePointActive}
                 audioAnalyzer={audioAnalyzerRef}
+                gravityMagnitude={gravityMagnitude}
                 emitterPos={ worldSpacePoses.length >0 ? getChestVector(worldSpacePoses) : null}
                 hands={worldSpacePoses.length >0 ? getHandsVector(worldSpacePoses) : undefined } 
               />
@@ -183,6 +185,15 @@ export default function Home() {
               step={.5}
               value={maxSpeed}
               setValue={setMaxSpeed}
+            />
+            <SettingItem 
+              type="FLOAT"
+              displayName='Gravity'
+              min={-50}
+              max={50}
+              step={1}
+              value={gravityMagnitude}
+              setValue={setGravityMagnitude}
             />
             <SettingItem 
               type="FLOAT"
