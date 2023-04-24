@@ -13,7 +13,7 @@ function PosePreview({ src, worldSpacePoses, worldSpaceVideoSize }: Props) {
     return(
         <>  
             { posesToVectors( worldSpacePoses ).map( (pos, i) => <PreviewPoint key={i} position={pos} />)}
-            <mesh scale={worldSpaceVideoSize} position={[0,0,-.1]}>
+            <mesh scale={worldSpaceVideoSize} position={[0,0,-.2]}>
                 <planeGeometry />
                 <VideoMaterial src={src} />
             </mesh>

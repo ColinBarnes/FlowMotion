@@ -19,6 +19,7 @@ import { getChestVector, getHandsVector } from '@/utils/getPose'
 import SubMenu from '@/components/Menu/SubMenu'
 import Menu from '@/components/Menu/Menu'
 import MenuItem from '@/components/Menu/MenuItem'
+import Fluid from '@/components/Fluid/Fluid'
 
 export default function Home() {
   // Input
@@ -135,7 +136,7 @@ export default function Home() {
                 <meshBasicMaterial transparent  opacity={0} />
               </mesh>
               
-              <Particles 
+              {true && <Particles 
                 particleCount={particleCount}
                 maxLifeTime={maxLifeTime}
                 maxSpeed={maxSpeed}
@@ -147,6 +148,11 @@ export default function Home() {
                 emitterPos={ worldSpacePoses.length >0 ? getChestVector(worldSpacePoses) : null}
                 hands={worldSpacePoses.length >0 ? getHandsVector(worldSpacePoses) : undefined } 
                 attractorStrength={attractorStrength}
+              /> }
+              <Fluid 
+                videoResolution={cameraResolution}
+                scale={poseScale}
+                hands={videoSpacePoses.length >0 ? getHandsVector(videoSpacePoses) : undefined } 
               />
               <OrthographicCamera
                 makeDefault

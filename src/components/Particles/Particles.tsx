@@ -98,7 +98,7 @@ const Particles = ( {
     gravityMagnitude = -10,
     attractorStrength = 10
 }: Props) => {    
-    const swap = useRef(false); // Used to swap render targets ever frame
+    const swap = useRef(false); // Used to swap render targets every frame
     const shaderSimulationRef = useRef<ShaderMaterial>(null);
     const particleMaterialRef = useRef<ShaderMaterial>(null);
     const count = useMemo( () => Math.min( MAXPARTICLES, Math.max(0, particleCount) ), [particleCount]);
