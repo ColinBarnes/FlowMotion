@@ -33,7 +33,15 @@ type ToggleSettingItem = {
     setValue: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-type SettingItem = FloatSettingItem | Vec2SettingItem | Vec3SettingItem | ToggleSettingItem;
+type DropDownSettingItem = {
+    displayName: string
+    type: "DROPDOWN"
+    value: string
+    options: string[]
+    setValue: React.Dispatch<React.SetStateAction<string>> | ( ( _: any ) => void)
+}
+
+type SettingItem = FloatSettingItem | Vec2SettingItem | Vec3SettingItem | ToggleSettingItem | DropDownSettingItem;
 
 function isFloat(item: SettingItem ): item is FloatSettingItem {
     return (item as FloatSettingItem).type === "FLOAT";
@@ -51,6 +59,10 @@ function isToggle(item: SettingItem ): item is ToggleSettingItem {
     return (item as ToggleSettingItem).type === "TOGGLE";
 }
 
+function isDropDown(item: SettingItem ): item is DropDownSettingItem {
+    return (item as DropDownSettingItem).type === "DROPDOWN";
+}
+
 const SettingItem = (item: SettingItem) => {
     return (
         <div className='h-full m-auto md:text-xl flex flex-col items-center justify-evenly sm:text-sm'>
@@ -66,6 +78,14 @@ const SettingItem = (item: SettingItem) => {
                         value={item.value}
                         onChange={e => item.setValue(e.target.valueAsNumber)}
                         />
+                    }
+                    {isDropDown(item) &&
+                        <select 
+                            value={item.value}
+                            onChange={e => item.setValue(e.target.value)}
+                        >
+                            {item.options.map( (op, i) => <option key={i} value={op}>{op}</option> )}
+                        </select>
                     }
                     {isToggle(item) &&
                         <div>{ item.value ? 'Enabled' : 'Disabled' }</div>

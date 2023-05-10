@@ -20,6 +20,7 @@ import SubMenu from '@/components/Menu/SubMenu'
 import Menu from '@/components/Menu/Menu'
 import MenuItem from '@/components/Menu/MenuItem'
 import Fluid from '@/components/Fluid/Fluid'
+import ParticlesSource, { useParticleStore } from '@/components/Particles/ParticlesSource'
 
 export default function Home() {
   // Input
@@ -68,6 +69,7 @@ export default function Home() {
   const [forcePointActive, setForcePointActive] = useState(true);
   const [gravityMagnitude, setGravityMagnitude] = useState(-10);
   const [attractorStrength, setAttractorStrength] = useState(10);
+  const particleTypeSettings = useParticleStore( (state) => state.settings );
 
   const handlePointerMove = ( event: ThreeEvent<PointerEvent> ) => {
     setMouseLoc( new Vector2(event.unprojectedPoint.x, event.unprojectedPoint.y) );
@@ -136,7 +138,7 @@ export default function Home() {
                 <meshBasicMaterial transparent  opacity={0} />
               </mesh>
               
-              {true && <Particles 
+              {false && <Particles 
                 particleCount={particleCount}
                 maxLifeTime={maxLifeTime}
                 maxSpeed={maxSpeed}
@@ -149,6 +151,19 @@ export default function Home() {
                 hands={worldSpacePoses.length >0 ? getHandsVector(worldSpacePoses) : undefined } 
                 attractorStrength={attractorStrength}
               /> }
+              <ParticlesSource 
+                particleCount={particleCount}
+                maxLifeTime={maxLifeTime}
+                maxSpeed={maxSpeed}
+                volumeSensitivity={volumeSensitivity}
+                forcePoint={mouseLoc}
+                forcePointActive={forcePointActive}
+                audioAnalyzer={audioAnalyzerRef}
+                gravityMagnitude={gravityMagnitude}
+                emitterPos={ worldSpacePoses.length >0 ? getChestVector(worldSpacePoses) : null}
+                hands={worldSpacePoses.length >0 ? getHandsVector(worldSpacePoses) : undefined } 
+                attractorStrength={attractorStrength}
+              />
               <Fluid 
                 videoResolution={cameraResolution}
                 scale={poseScale}
@@ -168,6 +183,9 @@ export default function Home() {
             </Canvas>
           </div>
           <SubMenu visible={viewParticleSettings}>
+            <SettingItem 
+              {...particleTypeSettings}
+            />
             <SettingItem 
               type="FLOAT"
               displayName='Particle Count'

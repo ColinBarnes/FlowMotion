@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import * as poseDetection from '@tensorflow-models/pose-detection';
+import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-webgl';
 import useContain from './useContains';
 import { Vector2 } from 'three';
@@ -10,6 +11,7 @@ function usePoseDetector(videoRef: React.MutableRefObject<HTMLVideoElement | nul
 
   useEffect(() => {
     async function setupPoseDetector() {
+        await tf.ready();
         const detectorConfig = {modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING};
         const detect = await poseDetection.createDetector(
             poseDetection.SupportedModels.MoveNet,

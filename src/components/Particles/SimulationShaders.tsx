@@ -114,7 +114,7 @@ void main()	{
 
     posVel = vec4(Pos, Vel);
 
-    // Total lifetime of particle is between [minLifetim,MAXLIFETIME]
+    // Total lifetime of particle is between [minLifetime,MAXLIFETIME]
     float minLifetime = 1.;
     float lifeTime = hash21( uvec2( gv ) ) * max(0., MAXLIFETIME-minLifetime) + minLifetime ; // Must match the lifetime in particle
 
