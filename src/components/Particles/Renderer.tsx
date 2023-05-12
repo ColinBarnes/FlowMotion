@@ -19,7 +19,10 @@ const Uniforms = {
         value: 10
     },
     particleScale: {
-        value: 0
+        value: 0.
+    },
+    particleSize: {
+        value: 1
     },
     flipBook1: {
         value: null
@@ -34,6 +37,7 @@ const Uniforms = {
 
 type Props = {
     particleType?: ParticleTypes,
+    particleSize: number,
     count: number,
     simulation: WebGLRenderTarget,
     maxLifeTime?: number,
@@ -41,7 +45,7 @@ type Props = {
 }
 const useClassic = false;
 const useFlipBook = true;
-function Renderer({count, simulation, maxLifeTime, volume, particleType='DEFAULT'}: Props) {
+function Renderer({count, simulation, maxLifeTime, volume, particleType='DEFAULT', particleSize = 1}: Props) {
     const particleMaterialRef = useRef<ShaderMaterial>(null);
     
     const flipBook1 = useLoader(TGALoader, '/Assets/Flipbooks/WispySmoke01-flipbooks/WispySmoke01_8x8.tga');
@@ -92,6 +96,7 @@ function Renderer({count, simulation, maxLifeTime, volume, particleType='DEFAULT
             particleMaterialRef.current.uniforms.MAXLIFETIME.value = maxLifeTime;
             particleMaterialRef.current.uniforms.particleCount.value = count;
             particleMaterialRef.current.uniforms.particleScale.value = volume?.current;
+            particleMaterialRef.current.uniforms.particleSize.value = particleSize;
         }        
     });
 

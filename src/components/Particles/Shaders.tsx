@@ -4,6 +4,7 @@ uniform float MAXLIFETIME;
 uniform sampler2D simulation;
 uniform float particleCount;
 uniform float particleScale;
+uniform float particleSize;
 
 attribute float index;
 attribute vec3 offset;
@@ -91,6 +92,7 @@ void main() {
   vlifetime = hash21( uvec2( gv ) ) * max(0., MAXLIFETIME-minLifetime) + minLifetime ; // Must match the lifetime in the SimulationShader
   float scale = 1. - fract( (iTime -.016)/vlifetime); // Nudged time by approx one frame to prevent scale "popping"
   scale *= mix( 1., 3., particleScale );
+  scale *= particleSize;
   vec4 modelViewPosition = modelViewMatrix * vec4(position*scale + vec3(pos,0.), 1.0);
  
   vparticleCount = particleCount;

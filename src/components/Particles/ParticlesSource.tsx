@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { useFBO } from "@react-three/drei";
 import { useMemo, useRef, useState } from "react";
 import { create } from "zustand";
+import {immer} from 'zustand/middleware/immer';
 
 type Props = {
     particleCount?: number,
@@ -30,27 +31,77 @@ type ParticleTypeSettings = {
     setValue: (parType: ParticleTypes) => void
 }
 
-interface ParticleState {
+interface ParticleTypeState {
     settings: ParticleTypeSettings
 }
 
+type FloatControl = {
+    displayName: string
+    type: "FLOAT"
+    value: number
+    min: number
+    max: number
+    step?: number
+}
 
-export const useParticleStore = create<ParticleState>()((set) => ({
-    settings: {
+type DropDownControl = {
+    displayName: string
+    type: "DROPDOWN"
+    value: string
+    options: string[]
+}
+
+type Name = {
+    name: string
+}
+
+type Controls = (FloatControl & Name) | (DropDownControl & Name);
+type Settings = FloatControl | DropDownControl;
+
+const controls: Controls[] = [
+    {
         displayName: "Particle Type",
+        name: "particleType",
         type: "DROPDOWN",
         value: "DEFAULT",
-        options: ['DEFAULT', 'SMOKE'],
-        setValue: (parType) => set((state) => (
-            {
-                ...state, 
-                settings: {
-                    ...state.settings,
-                    value: parType
-                } 
-            }))
+        options: ['DEFAULT', 'SMOKE']
+    },
+    {
+        displayName: "Particle Size",
+        name: "particleSize",
+        type: "FLOAT",
+        value: 1.,
+        min: 0.,
+        max: 3.,
+        step: .1
     }
-}));
+];
+
+interface SettingsObject {
+    [key: string]: Settings
+}
+
+function controlsToHashTable( controls: Controls[] ) {
+    return controls.reduce( (acc: SettingsObject, curr: Controls) => {
+        const {name, ...rest} = curr;
+        acc[name] = rest;
+        return acc;
+    }, {} as SettingsObject );
+}
+
+interface ParticleState {
+    settings: SettingsObject
+    setValue: (name: string) => (value: any) => void
+}
+
+export const useParticleStore = create( 
+    immer<ParticleState>((set) => ({
+        settings: controlsToHashTable(controls),
+        setValue: (name: string) => (value) => set( (state) => {
+            state.settings[name].value = value;
+        })
+    }))
+);
 
 const MAXPARTICLES = 5_000;
 function ParticlesSource( { 
@@ -72,7 +123,10 @@ function ParticlesSource( {
     const audioTimeDomainData = useRef<Uint8Array | null>(null);
     const volume = useRef<number | null>(null);
 
-    const particleType = useParticleStore( (state) => state.settings.value );
+    //const particleType = useParticleTypeStore( (state) => state.settings.value );
+
+    const particleSize = useParticleStore( (state) => state.settings["particleSize"].value ) as number;
+    const particleType = useParticleStore( (state) => state.settings["particleType"].value ) as ParticleTypes;
 
     const renderTargetA = useFBO(textureSize, textureSize, {
         minFilter: NearestFilter,
@@ -128,6 +182,7 @@ function ParticlesSource( {
             />
             <Renderer
                 particleType={particleType}
+                particleSize={particleSize}
                 simulation={currFrame}
                 volume={volume}
                 count={particleCount}

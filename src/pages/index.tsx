@@ -69,7 +69,8 @@ export default function Home() {
   const [forcePointActive, setForcePointActive] = useState(true);
   const [gravityMagnitude, setGravityMagnitude] = useState(-10);
   const [attractorStrength, setAttractorStrength] = useState(10);
-  const particleTypeSettings = useParticleStore( (state) => state.settings );
+  const particleSettings = useParticleStore( (state) => state.settings );
+  const setParticleSettings = useParticleStore( (state) => state.setValue );
 
   const handlePointerMove = ( event: ThreeEvent<PointerEvent> ) => {
     setMouseLoc( new Vector2(event.unprojectedPoint.x, event.unprojectedPoint.y) );
@@ -183,9 +184,11 @@ export default function Home() {
             </Canvas>
           </div>
           <SubMenu visible={viewParticleSettings}>
-            <SettingItem 
-              {...particleTypeSettings}
-            />
+            {
+              Object.keys(particleSettings).map( (name, i) => {
+                return <SettingItem key={i} {...particleSettings[name] } setValue={setParticleSettings(name) } />
+              })
+            }
             <SettingItem 
               type="FLOAT"
               displayName='Particle Count'
